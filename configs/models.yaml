@@ -1,0 +1,42 @@
+# Modelling configuration. All splits are chronological; fractions refer to time order.
+split:
+  train_frac: 0.70
+  valid_frac: 0.15      # remainder is the held-out test period
+cv_folds: 4             # TimeSeriesSplit folds on the training period
+random_state: 42
+optuna_trials: 25       # per algorithm; set 0 to skip tuning
+shap_sample: 2000
+
+congestion:
+  # Congestion level = observed speed / segment free-flow speed.
+  # Free-flow = 85th percentile of segment speed during 22:00-05:59, computed on TRAIN period only.
+  ratio_bins: [0.0, 0.4, 0.6, 0.8, 10.0]
+  labels: [Severe, High, Moderate, Low]
+  horizons_minutes: [15, 60, 360, 1440]
+  bin_minutes: 15
+
+speed:
+  horizons_minutes: [15, 60, 360, 1440]
+
+travel_time:
+  sample_trips: 1500000
+  max_duration_min: 180
+  min_duration_min: 1
+  max_speed_mph: 80
+
+demand:
+  horizons_hours: [1, 6, 24]
+  top_zones_classical: 10     # SARIMA / Prophet fitted on the busiest zones (expensive per-series models)
+  enable_lstm: false          # optional; requires `pip install torch`
+
+hotspots:
+  dbscan_eps_m: 150
+  dbscan_min_samples: 25
+  hdbscan_min_cluster_size: 40
+  kmeans_k: 12
+  kde_bandwidth_m: 300
+  gi_alpha: 0.05
+
+anomaly:
+  contamination: 0.01
+  robust_z_threshold: 4.0

@@ -1,0 +1,81 @@
+# Verified data-source registry (checked 2026-11-24 against each portal's metadata API).
+# Every ingestion module reads its endpoints, columns and windows from here.
+
+nyc_tlc:
+  base_url: https://d37ci6vzurychx.cloudfront.net
+  trip_path: /trip-data/{service}_tripdata_{year}-{month:02d}.parquet
+  zone_lookup_path: /misc/taxi_zone_lookup.csv
+  zone_shapes_path: /misc/taxi_zones.zip
+  services: [yellow, green]            # add fhvhv for High Volume FHV (≈20M rows / month)
+  months_back: 3                       # incremental window: most recent N published months
+  latest_published: "2026-09"          # TLC publishes with ~2 month lag; ingestion probes newer months
+  columns:
+    yellow: [tpep_pickup_datetime, tpep_dropoff_datetime, passenger_count, trip_distance,
+             PULocationID, DOLocationID, fare_amount, total_amount]
+    green:  [lpep_pickup_datetime, lpep_dropoff_datetime, passenger_count, trip_distance,
+             PULocationID, DOLocationID, fare_amount, total_amount]
+    fhvhv:  [hvfhs_license_num, pickup_datetime, dropoff_datetime, trip_miles, trip_time,
+             PULocationID, DOLocationID, base_passenger_fare]
+  update_frequency: monthly (≈2-month publication lag)
+
+chicago_crashes:
+  domain: data.cityofchicago.org
+  dataset_id: 85ca-t3if
+  date_column: crash_date
+  days_back: 730
+  page_size: 50000
+  select: [crash_record_id, crash_date, posted_speed_limit, traffic_control_device, weather_condition,
+           lighting_condition, first_crash_type, trafficway_type, roadway_surface_cond, road_defect,
+           crash_type, intersection_related_i, hit_and_run_i, damage, prim_contributory_cause,
+           most_severe_injury, injuries_total, injuries_fatal, injuries_incapacitating,
+           crash_hour, crash_day_of_week, crash_month, latitude, longitude, num_units]
+  update_frequency: daily
+
+chicago_traffic:
+  # n4j6-wkkf (named in the original brief) is DEPRECATED: last rows 2026-04-30.
+  # 4g9f-3jbs is its documented successor and itself stopped updating ≈2026-05-31.
+  # Both are therefore treated as HISTORICAL sources, never as live traffic.
+  domain: data.cityofchicago.org
+  dataset_id: 4g9f-3jbs
+  deprecated_snapshot_id: n4j6-wkkf
+  date_column: time
+  days_back: 60                       # counted back from the dataset's last timestamp, not today
+  page_size: 50000
+  select: [time, segment_id, speed, street, direction, from_street, to_street, length,
+           bus_count, message_count, start_latitude, start_longitude, end_latitude, end_longitude]
+  update_frequency: none (archived)
+  is_live: false
+
+nyc_dot_speeds:
+  domain: data.cityofnewyork.us
+  dataset_id: i4gi-tjb9
+  date_column: data_as_of
+  hours_back: 72
+  page_size: 50000
+  select: [id, speed, travel_time, status, data_as_of, link_id, link_points, borough, link_name]
+  update_frequency: several times per minute
+  is_live: true
+  stale_after_minutes: 60             # older than this => shown as "latest available", not live
+
+open_meteo:
+  archive_url: https://archive-api.open-meteo.com/v1/archive
+  forecast_url: https://api.open-meteo.com/v1/forecast
+  hourly: [temperature_2m, precipitation, rain, snowfall, wind_speed_10m, relative_humidity_2m, weather_code]
+  forecast_extra_hourly: [visibility]   # visibility exists in forecast API only
+  locations:
+    nyc: {latitude: 40.7128, longitude: -74.0060, timezone: America/New_York}
+    chicago: {latitude: 41.8781, longitude: -87.6298, timezone: America/Chicago}
+
+osm:
+  overpass_url: https://overpass-api.de/api/interpreter
+  places:
+    nyc: "Manhattan, New York, USA"
+    chicago: "Chicago, Illinois, USA"
+  network_type: drive
+  major_highway_classes: [motorway, trunk, primary]
+
+geo:
+  h3_resolution: 8
+  bbox:
+    nyc: {min_lat: 40.49, max_lat: 40.92, min_lon: -74.27, max_lon: -73.68}
+    chicago: {min_lat: 41.64, max_lat: 42.03, min_lon: -87.95, max_lon: -87.52}
