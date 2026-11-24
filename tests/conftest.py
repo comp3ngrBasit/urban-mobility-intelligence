@@ -67,3 +67,19 @@ def populated(env):
     cleaners.clean_tlc()
     cleaners.clean_weather()
     return env
+
+
+@pytest.fixture(scope="session")
+def trained(populated):
+    """Train every model once per session (fast config) and produce analytics artifacts."""
+    from src.analytics import eda
+    from src.forecasting import demand
+    from src.geospatial import hotspots
+    from src.models import anomaly, traffic, travel_time
+    traffic.train_all(horizons=[60])
+    travel_time.train()
+    demand.train_ml(horizons=[1])
+    hotspots.run()
+    anomaly.run()
+    eda.run_all()
+    return populated

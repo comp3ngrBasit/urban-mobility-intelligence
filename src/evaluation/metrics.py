@@ -31,7 +31,7 @@ def classification_metrics(y_true, y_pred, proba: np.ndarray | None, labels: lis
                                 "matrix": confusion_matrix(y_true, y_pred, labels=labels).tolist()},
            "n": int(len(y_true))}
     if proba is not None:
-        present = [l for l in labels if l in set(y_true)]
+        present = sorted(l for l in labels if l in set(y_true))   # sklearn requires sorted labels
         if len(present) >= 2:
             try:
                 idx = [labels.index(l) for l in present]

@@ -75,7 +75,8 @@ def train_all(horizons: list[int] | None = None) -> dict:
             algorithms=["lightgbm", "xgboost", "hist_gradient_boosting", "random_forest"],
             baselines={"persistence": lambda d: d["speed_at_issue"].to_numpy(),
                        "historical_profile": lambda d: d["hist_profile_speed"].to_numpy()},
-            error_groups=["segment_id", "hour", "dow"], extra_config={"horizon_min": H})
+            error_groups=["segment_id", "hour", "dow", "rain_intensity", "weather_category"],
+            extra_config={"horizon_min": H})
         summary[f"speed_h{H}"] = train_task(hist, speed_spec, meta)
         _add_intervals_and_forecast(f"speed_h{H}", hist, forecast_rows, fcols)
 
@@ -86,7 +87,8 @@ def train_all(horizons: list[int] | None = None) -> dict:
             baselines={"persistence": lambda d: congestion_label(d["congestion_ratio_at_issue"]).astype(str).to_numpy(),
                        "historical_profile": lambda d: congestion_label(
                            d["hist_profile_speed"] / d["free_flow_speed"]).astype(str).to_numpy()},
-            error_groups=["segment_id", "hour", "dow"], extra_config={"horizon_min": H})
+            error_groups=["segment_id", "hour", "dow", "rain_intensity", "weather_category"],
+            extra_config={"horizon_min": H})
         summary[f"congestion_h{H}"] = train_task(hist, cong_spec, meta)
         _save_forecast_classes(f"congestion_h{H}", forecast_rows, fcols)
 

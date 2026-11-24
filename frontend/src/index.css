@@ -1,0 +1,17 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root { color-scheme: dark; }
+body { @apply text-slate-200 antialiased; font-feature-settings: "cv11", "ss01"; }
+.panel { @apply rounded-xl border border-ink-700 bg-ink-850/80; }
+.label { @apply text-[11px] font-medium uppercase tracking-[0.08em] text-slate-400; }
+.num { @apply font-mono tabular-nums; }
+select, input { @apply rounded-md border border-ink-600 bg-ink-800 px-2.5 py-1.5 text-sm text-slate-100 outline-none focus:border-electric-500; }
+table.data { @apply w-full text-sm; }
+table.data th { @apply border-b border-ink-700 px-3 py-2 text-left text-[11px] font-medium uppercase tracking-wider text-slate-400; }
+table.data td { @apply border-b border-ink-800 px-3 py-2; }
+.maplibregl-popup-content { @apply !bg-ink-800 !text-slate-100 !rounded-lg !shadow-xl text-xs; }
+.maplibregl-popup-tip { border-top-color: #131D33 !important; border-bottom-color: #131D33 !important; }
+.maplibregl-ctrl-attrib { @apply !bg-ink-900/70 !text-slate-500; }
+.maplibregl-ctrl-attrib a { @apply !text-slate-400; }
